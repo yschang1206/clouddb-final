@@ -59,7 +59,6 @@ class CheckpointRecord implements LogRecord {
 	 */
 	public CheckpointRecord(BasicLogRecord rec) {
 		int txCount = (Integer) rec.nextVal(INTEGER).asJavaVal();
-		this.lsn = rec.getLSN();
 		this.txNums = new ArrayList<Long>();
 		for (int i = 0; i < txCount; i++) {
 			txNums.add((Long) rec.nextVal(BIGINT).asJavaVal());
@@ -75,8 +74,7 @@ class CheckpointRecord implements LogRecord {
 	 */
 	@Override
 	public LogSeqNum writeToLog() {
-		List<Constant> rec = buildRecord();
-		return logMgr.append(rec.toArray(new Constant[rec.size()]));
+		return nvmLogMgr.append(this);
 	}
 
 	@Override
@@ -146,5 +144,10 @@ class CheckpointRecord implements LogRecord {
 	@Override
 	public LogSeqNum getLSN() {
 		return lsn;
+	}
+	
+	@Override
+	public void setLSN(LogSeqNum lsn) {
+		this.lsn = lsn;
 	}
 }

@@ -22,48 +22,28 @@ import org.vanilladb.core.storage.file.Page;
 
 public class LogSeqNum implements Comparable<LogSeqNum> {
 
-	public static final int SIZE = Type.BIGINT.maxSize() * 2;
+	public static final int SIZE = Type.BIGINT.maxSize();
 	
-	public static final LogSeqNum DEFAULT_VALUE = new LogSeqNum(-1, -1);
+	public static final LogSeqNum DEFAULT_VALUE = new LogSeqNum(-1);
 
-	private final long blkNum, offset;
-	private final int hashCode;
+	private final long val;
 
 	public static LogSeqNum readFromPage(Page page, int pos) {
-		long blkNum = (long) page.getVal(pos, Type.BIGINT).asJavaVal();
-		long offset = (long) page.getVal(pos + Type.BIGINT.maxSize(), Type.BIGINT).asJavaVal();
+		long val = (long) page.getVal(pos, Type.BIGINT).asJavaVal();
 
-		return new LogSeqNum(blkNum, offset);
+		return new LogSeqNum(val);
 	}
 
-	public LogSeqNum(long blkNum, long offset) {
-		this.blkNum = blkNum;
-		this.offset = offset;
-
-		// Generate the hash code
-		// Don't ask why, just magic.
-		int hashCode = 17;
-		hashCode = 31 * hashCode + (int) (blkNum ^ (blkNum >>> 32));
-		hashCode = 31 * hashCode + (int) (offset ^ (offset >>> 32));
-		this.hashCode = hashCode;
+	public LogSeqNum(long val) {
+		this.val = val;
 	}
 
-	public long blkNum() {
-		return blkNum;
-	}
-
-	public long offset() {
-		return offset;
-	}
-
-	// XXX: This might be not needed
-	public Constant[] toConstants() {
-		return new Constant[] { new BigIntConstant(blkNum), new BigIntConstant(offset) };
+	public long val() {
+		return val;
 	}
 
 	public void writeToPage(Page page, int pos) {
-		page.setVal(pos, new BigIntConstant(blkNum));
-		page.setVal(pos + Type.BIGINT.maxSize(), new BigIntConstant(offset));
+		page.setVal(pos, new BigIntConstant(val));
 	}
 
 	@Override
@@ -75,34 +55,25 @@ public class LogSeqNum implements Comparable<LogSeqNum> {
 			return false;
 
 		LogSeqNum lsn = (LogSeqNum) obj;
-		return lsn.blkNum == this.blkNum && lsn.offset == this.offset;
+		return lsn.val == this.val;
 	}
 
 	@Override
 	public int hashCode() {
-		return hashCode;
+		return Long.hashCode(val);
 	}
 
 	@Override
 	public String toString() {
-		return "[" + blkNum + ", " + offset + "]";
+		return "[" + val + "]";
 	}
 
 	@Override
 	public int compareTo(LogSeqNum lsn) {
-		// Compare the block numbers
-		if (blkNum < lsn.blkNum)
+		if (val < lsn.val)
 			return -1;
-		else if (blkNum > lsn.blkNum)
+		else if (val > lsn.val)
 			return 1;
-
-		// Compare the offsets
-		if (offset < lsn.offset)
-			return -1;
-		else if (offset > lsn.offset)
-			return 1;
-
-		// All of them are the same
 		return 0;
 	}
 }

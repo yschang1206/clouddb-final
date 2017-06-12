@@ -26,7 +26,7 @@ import org.vanilladb.core.storage.file.Page;
  * log record, and what their types are.
  */
 public class BasicLogRecord {
-	private LogSeqNum lsn;
+	private LogPosition lsn;
 	private Page pg;
 	private int currentPos;
 
@@ -39,7 +39,7 @@ public class BasicLogRecord {
 	 * @param lsn
 	 *            the sequence number of the log record
 	 */
-	public BasicLogRecord(Page pg, LogSeqNum lsn) {
+	public BasicLogRecord(Page pg, LogPosition lsn) {
 		this.pg = pg;
 		this.lsn = lsn;
 		this.currentPos = (int) lsn.offset();
@@ -61,7 +61,7 @@ public class BasicLogRecord {
 	 * 
 	 * @return the LSN
 	 */
-	public LogSeqNum getLSN() {
+	public LogPosition getLSN() {
 		return lsn;
 	}
 }

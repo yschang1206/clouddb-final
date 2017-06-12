@@ -76,7 +76,7 @@ public class LogIterator implements ReversibleIterator<BasicLogRecord> {
 		if (currentRec == 0)
 			moveToNextBlock();
 		currentRec = (Integer) pg.getVal(currentRec, INTEGER).asJavaVal();
-		return new BasicLogRecord(pg, new LogSeqNum(blk.number(), currentRec + pointerSize * 2));
+		return new BasicLogRecord(pg, new LogPosition(blk.number(), currentRec + pointerSize * 2));
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class LogIterator implements ReversibleIterator<BasicLogRecord> {
 		if (currentRec > (Integer) pg.getVal(currentRec, INTEGER).asJavaVal())
 			moveToPrevBlock();
 
-		BasicLogRecord record = new BasicLogRecord(pg, new LogSeqNum(blk.number(), currentRec + pointerSize));
+		BasicLogRecord record = new BasicLogRecord(pg, new LogPosition(blk.number(), currentRec + pointerSize));
 		currentRec = (Integer) pg.getVal(currentRec, INTEGER).asJavaVal();
 		return record;
 

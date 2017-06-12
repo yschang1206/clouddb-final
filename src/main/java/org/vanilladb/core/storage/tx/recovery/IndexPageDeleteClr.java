@@ -39,7 +39,7 @@ public class IndexPageDeleteClr extends IndexPageDeleteRecord implements Compesa
 
 	public IndexPageDeleteClr(BasicLogRecord rec) {
 		super(rec);
-		undoNextLSN = new LogSeqNum((Long) rec.nextVal(BIGINT).asJavaVal(), (Long) rec.nextVal(BIGINT).asJavaVal());
+		undoNextLSN = new LogSeqNum((Long) rec.nextVal(BIGINT).asJavaVal());
 	}
 
 	@Override
@@ -71,8 +71,7 @@ public class IndexPageDeleteClr extends IndexPageDeleteRecord implements Compesa
 	public List<Constant> buildRecord() {
 		List<Constant> rec = super.buildRecord();
 		rec.set(0, new IntegerConstant(op()));
-		rec.add(new BigIntConstant(undoNextLSN.blkNum()));
-		rec.add(new BigIntConstant(undoNextLSN.offset()));
+		rec.add(new BigIntConstant(undoNextLSN.val()));
 		return rec;
 	}
 

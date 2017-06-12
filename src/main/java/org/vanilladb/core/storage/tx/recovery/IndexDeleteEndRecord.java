@@ -65,15 +65,12 @@ public class IndexDeleteEndRecord extends LogicalEndRecord implements LogRecord 
 		searchKey = rec.nextVal(Type.newInstance(keyType));
 		recordBlockNum = (Long) rec.nextVal(BIGINT).asJavaVal();
 		recordSlotId = (Integer) rec.nextVal(INTEGER).asJavaVal();
-		super.logicalStartLSN = new LogSeqNum((Long) rec.nextVal(BIGINT).asJavaVal(),
-				(Long) rec.nextVal(BIGINT).asJavaVal());
-		lsn = rec.getLSN();
+		super.logicalStartLSN = new LogSeqNum((Long) rec.nextVal(BIGINT).asJavaVal());
 	}
 
 	@Override
 	public LogSeqNum writeToLog() {
-		List<Constant> rec = buildRecord();
-		return logMgr.append(rec.toArray(new Constant[rec.size()]));
+		return nvmLogMgr.append(this);
 	}
 
 	@Override
@@ -100,7 +97,7 @@ public class IndexDeleteEndRecord extends LogicalEndRecord implements LogRecord 
 		}
 		// Append a Logical Abort log at the end of the LogRecords
 		LogSeqNum lsn = tx.recoveryMgr().logLogicalAbort(this.txNum,this.logicalStartLSN);
-		VanillaDb.logMgr().flush(lsn);
+		VanillaDb.nvmLogMgr().flush(lsn);
 
 	}
 
@@ -133,8 +130,7 @@ public class IndexDeleteEndRecord extends LogicalEndRecord implements LogRecord 
 		rec.add(searchKey);
 		rec.add(new BigIntConstant(recordBlockNum));
 		rec.add(new IntegerConstant(recordSlotId));
-		rec.add(new BigIntConstant(super.logicalStartLSN.blkNum()));
-		rec.add(new BigIntConstant(super.logicalStartLSN.offset()));
+		rec.add(new BigIntConstant(super.logicalStartLSN.val()));
 		return rec;
 	}
 
@@ -143,4 +139,8 @@ public class IndexDeleteEndRecord extends LogicalEndRecord implements LogRecord 
 		return lsn;
 	}
 
+	@Override
+	public void setLSN(LogSeqNum lsn) {
+		this.lsn = lsn;
+	}
 }

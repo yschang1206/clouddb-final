@@ -39,15 +39,12 @@ public class LogicalAbortRecord extends LogicalEndRecord implements LogRecord {
 
 	public LogicalAbortRecord(BasicLogRecord rec) {
 		txNum = (Long) rec.nextVal(BIGINT).asJavaVal();
-		super.logicalStartLSN = new LogSeqNum((Long) rec.nextVal(BIGINT).asJavaVal(),
-				(Long) rec.nextVal(BIGINT).asJavaVal());
-		lsn = rec.getLSN();
+		super.logicalStartLSN = new LogSeqNum((Long) rec.nextVal(BIGINT).asJavaVal());
 	}
 
 	@Override
 	public LogSeqNum writeToLog() {
-		List<Constant> rec = buildRecord();
-		return logMgr.append(rec.toArray(new Constant[rec.size()]));
+		return nvmLogMgr.append(this);
 	}
 
 	@Override
@@ -90,15 +87,17 @@ public class LogicalAbortRecord extends LogicalEndRecord implements LogRecord {
 		List<Constant> rec = new LinkedList<Constant>();
 		rec.add(new IntegerConstant(op()));
 		rec.add(new BigIntConstant(txNum));
-		rec.add(new BigIntConstant(super.logicalStartLSN.blkNum()));
-		rec.add(new BigIntConstant(super.logicalStartLSN.offset()));
+		rec.add(new BigIntConstant(super.logicalStartLSN.val()));
 		return rec;
 	}
 
 	@Override
 	public LogSeqNum getLSN() {
-
 		return lsn;
 	}
-
+	
+	@Override
+	public void setLSN(LogSeqNum lsn) {
+		this.lsn = lsn;
+	}
 }

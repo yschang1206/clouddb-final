@@ -33,6 +33,7 @@ import org.vanilladb.core.sql.storedprocedure.SampleStoredProcedureFactory;
 import org.vanilladb.core.sql.storedprocedure.StoredProcedureFactory;
 import org.vanilladb.core.storage.file.FileMgr;
 import org.vanilladb.core.storage.log.LogMgr;
+import org.vanilladb.core.storage.log.NVMLogMgr;
 import org.vanilladb.core.storage.metadata.CatalogMgr;
 import org.vanilladb.core.storage.metadata.statistics.StatMgr;
 import org.vanilladb.core.storage.tx.Transaction;
@@ -65,6 +66,7 @@ public class VanillaDb {
 	// Managers
 	private static FileMgr fileMgr;
 	private static LogMgr logMgr;
+	private static NVMLogMgr nvmLogMgr;
 	private static CatalogMgr catalogMgr;
 	private static StatMgr statMgr;
 	private static TaskMgr taskMgr;
@@ -197,6 +199,7 @@ public class VanillaDb {
 	public static void initFileAndLogMgr(String dirName) {
 		initFileMgr(dirName);
 		logMgr = new LogMgr();
+		nvmLogMgr = new NVMLogMgr();
 	}
 
 	/**
@@ -250,6 +253,10 @@ public class VanillaDb {
 
 	public static LogMgr logMgr() {
 		return logMgr;
+	}
+	
+	public static NVMLogMgr nvmLogMgr() {
+		return nvmLogMgr;
 	}
 
 	public static CatalogMgr catalogMgr() {

@@ -52,7 +52,6 @@ class CommitRecord implements LogRecord {
 	 */
 	public CommitRecord(BasicLogRecord rec) {
 		txNum = (Long) rec.nextVal(BIGINT).asJavaVal();
-		lsn = rec.getLSN();
 	}
 
 	/**
@@ -63,8 +62,7 @@ class CommitRecord implements LogRecord {
 	 */
 	@Override
 	public LogSeqNum writeToLog() {
-		List<Constant> rec = buildRecord();
-		return logMgr.append(rec.toArray(new Constant[rec.size()]));
+		return nvmLogMgr.append(this);
 	}
 
 	@Override
@@ -108,5 +106,10 @@ class CommitRecord implements LogRecord {
 	@Override
 	public LogSeqNum getLSN() {
 		return lsn;
+	}
+	
+	@Override
+	public void setLSN(LogSeqNum lsn) {
+		this.lsn = lsn;
 	}
 }

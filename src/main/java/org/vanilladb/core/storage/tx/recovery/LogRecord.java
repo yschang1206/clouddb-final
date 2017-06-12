@@ -21,6 +21,7 @@ import org.vanilladb.core.server.VanillaDb;
 import org.vanilladb.core.sql.Constant;
 import org.vanilladb.core.storage.log.LogMgr;
 import org.vanilladb.core.storage.log.LogSeqNum;
+import org.vanilladb.core.storage.log.NVMLogMgr;
 import org.vanilladb.core.storage.tx.Transaction;
 
 /**
@@ -36,7 +37,7 @@ public interface LogRecord {
 			OP_INDEX_FILE_DELETE_END = -74, OP_INDEX_PAGE_INSERT = -75, OP_INDEX_PAGE_DELETE = -76,
 			OP_SET_VALUE_CLR = -78, OP_INDEX_PAGE_INSERT_CLR = -79, OP_INDEX_PAGE_DELETE_CLR = -80;
 
-	static LogMgr logMgr = VanillaDb.logMgr();
+	static NVMLogMgr nvmLogMgr = VanillaDb.nvmLogMgr();
 
 	/**
 	 * Build the constants for the physical log record and return them as a
@@ -77,6 +78,13 @@ public interface LogRecord {
 	 * @return the LSN
 	 */
 	LogSeqNum getLSN();
+	
+	/**
+	 * Set the log sequence number of this log record.
+	 * 
+	 * @param lsn
+	 */
+	void setLSN(LogSeqNum lsn);
 
 	/**
 	 * Undoes the operation encoded by this log record.

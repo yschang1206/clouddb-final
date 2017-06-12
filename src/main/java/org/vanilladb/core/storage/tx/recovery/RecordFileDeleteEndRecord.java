@@ -55,15 +55,12 @@ public class RecordFileDeleteEndRecord extends LogicalEndRecord implements LogRe
 		tblName = (String) rec.nextVal(VARCHAR).asJavaVal();
 		blkNum = (Long) rec.nextVal(BIGINT).asJavaVal();
 		slotId = (Integer) rec.nextVal(INTEGER).asJavaVal();
-		super.logicalStartLSN = new LogSeqNum((Long) rec.nextVal(BIGINT).asJavaVal(),
-				(Long) rec.nextVal(BIGINT).asJavaVal());
-		lsn = rec.getLSN();
+		super.logicalStartLSN = new LogSeqNum((Long) rec.nextVal(BIGINT).asJavaVal());
 	}
 
 	@Override
 	public LogSeqNum writeToLog() {
-		List<Constant> rec = buildRecord();
-		return logMgr.append(rec.toArray(new Constant[rec.size()]));
+		return nvmLogMgr.append(this);
 	}
 
 	@Override
@@ -87,7 +84,7 @@ public class RecordFileDeleteEndRecord extends LogicalEndRecord implements LogRe
 		rf.insert(new RecordId(blk, slotId));
 		// Append a Logical Abort log at the end of the LogRecords
 		LogSeqNum lsn = tx.recoveryMgr().logLogicalAbort(this.txNum, this.logicalStartLSN);
-		VanillaDb.logMgr().flush(lsn);
+		VanillaDb.nvmLogMgr().flush(lsn);
 
 	}
 
@@ -117,15 +114,17 @@ public class RecordFileDeleteEndRecord extends LogicalEndRecord implements LogRe
 		rec.add(new VarcharConstant(tblName));
 		rec.add(new BigIntConstant(blkNum));
 		rec.add(new IntegerConstant(slotId));
-		rec.add(new BigIntConstant(super.logicalStartLSN.blkNum()));
-		rec.add(new BigIntConstant(super.logicalStartLSN.offset()));
+		rec.add(new BigIntConstant(super.logicalStartLSN.val()));
 		return rec;
 	}
 
 	@Override
 	public LogSeqNum getLSN() {
-
 		return lsn;
 	}
-
+	
+	@Override
+	public void setLSN(LogSeqNum lsn) {
+		this.lsn = lsn;
+	}
 }

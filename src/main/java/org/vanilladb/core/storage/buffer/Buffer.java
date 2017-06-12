@@ -208,7 +208,7 @@ public class Buffer {
 		flushLock.lock();
 		try {
 			if (isNew || modifiedBy.size() > 0) {
-				VanillaDb.logMgr().flush(lastLsn);
+				VanillaDb.nvmLogMgr().flush(lastLsn);
 				contents.write(blk);
 				modifiedBy.clear();
 				isNew = false;

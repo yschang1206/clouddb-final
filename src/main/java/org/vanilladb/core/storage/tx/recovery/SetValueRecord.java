@@ -83,7 +83,6 @@ class SetValueRecord implements LogRecord {
 		type = (Integer) rec.nextVal(INTEGER).asJavaVal();
 		val = rec.nextVal(Type.newInstance(type));
 		newVal = rec.nextVal(Type.newInstance(type));
-		lsn = rec.getLSN();
 	}
 
 	/**
@@ -98,7 +97,7 @@ class SetValueRecord implements LogRecord {
 	public LogSeqNum writeToLog() {
 
 		List<Constant> rec = buildRecord();
-		return logMgr.append(rec.toArray(new Constant[rec.size()]));
+		return nvmLogMgr.append(this);
 
 	}
 
@@ -129,7 +128,7 @@ class SetValueRecord implements LogRecord {
 		Buffer buff = tx.bufferMgr().pin(blk);
 		
 		LogSeqNum lsn = tx.recoveryMgr().logSetValClr(this.txNum, buff, offset, val, this.lsn);
-		VanillaDb.logMgr().flush(lsn);
+		VanillaDb.nvmLogMgr().flush(lsn);
 		
 		buff.setVal(offset, val, tx.getTransactionNumber(), null);
 		tx.bufferMgr().unpin(buff);
@@ -174,5 +173,9 @@ class SetValueRecord implements LogRecord {
 	public LogSeqNum getLSN() {
 		return lsn;
 	}
-
+	
+	@Override
+	public void setLSN(LogSeqNum lsn) {
+		this.lsn = lsn;
+	}
 }

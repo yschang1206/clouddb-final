@@ -39,7 +39,6 @@ public class LogicalStartRecord implements LogRecord {
 
 	public LogicalStartRecord(BasicLogRecord rec) {
 		this.txNum = (Long) rec.nextVal(BIGINT).asJavaVal();
-		lsn = rec.getLSN();
 	}
 
 	/**
@@ -53,8 +52,7 @@ public class LogicalStartRecord implements LogRecord {
 
 	@Override
 	public LogSeqNum writeToLog() {
-		List<Constant> rec = buildRecord();
-		return logMgr.append(rec.toArray(new Constant[rec.size()]));
+		return nvmLogMgr.append(this);
 	}
 
 	@Override
@@ -75,7 +73,7 @@ public class LogicalStartRecord implements LogRecord {
 	public void undo(Transaction tx) {
 
 		LogSeqNum lsn = tx.recoveryMgr().logLogicalAbort(this.txNum,this.lsn);
-		VanillaDb.logMgr().flush(lsn);
+		VanillaDb.nvmLogMgr().flush(lsn);
 
 	}
 
@@ -100,5 +98,10 @@ public class LogicalStartRecord implements LogRecord {
 		rec.add(new IntegerConstant(op()));
 		rec.add(new BigIntConstant(txNum));
 		return rec;
+	}
+	
+	@Override
+	public void setLSN(LogSeqNum lsn) {
+		this.lsn = lsn;
 	}
 }

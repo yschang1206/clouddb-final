@@ -56,7 +56,7 @@ public class RecoveryMgr implements TransactionLifecycleListener {
 		tx.recoveryMgr().doRecover(tx);
 		tx.bufferMgr().flushAll();
 		LogSeqNum lsn = new CheckpointRecord().writeToLog();
-		VanillaDb.logMgr().flush(lsn);
+		VanillaDb.nvmLogMgr().flush(lsn);
 	}
 
 	public static void partialRecover(Transaction tx, int stepsInUndo) {
@@ -91,7 +91,7 @@ public class RecoveryMgr implements TransactionLifecycleListener {
 	public void onTxCommit(Transaction tx) {
 		if (!tx.isReadOnly() && enableLogging) {
 			LogSeqNum lsn = new CommitRecord(txNum).writeToLog();
-			VanillaDb.logMgr().flush(lsn);
+			VanillaDb.nvmLogMgr().flush(lsn);
 		}
 	}
 
@@ -104,7 +104,7 @@ public class RecoveryMgr implements TransactionLifecycleListener {
 		if (!tx.isReadOnly() && enableLogging) {
 			doRollback(tx);
 			LogSeqNum lsn = new RollbackRecord(txNum).writeToLog();
-			VanillaDb.logMgr().flush(lsn);
+			VanillaDb.nvmLogMgr().flush(lsn);
 		}
 	}
 

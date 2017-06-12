@@ -63,14 +63,11 @@ public class IndexPageDeleteRecord implements LogRecord {
 		keyType = Type.newInstance((Integer) rec.nextVal(INTEGER).asJavaVal());
 		blkNum = (Long) rec.nextVal(BIGINT).asJavaVal();
 		slotId = (Integer) rec.nextVal(INTEGER).asJavaVal();
-		lsn = rec.getLSN();
 	}
 
 	@Override
 	public LogSeqNum writeToLog() {
-		List<Constant> rec = buildRecord();
-		return logMgr.append(rec.toArray(new Constant[rec.size()]));
-
+		return nvmLogMgr.append(this);
 	}
 
 	@Override
@@ -102,7 +99,7 @@ public class IndexPageDeleteRecord implements LogRecord {
 				LogSeqNum lsn = tx.recoveryMgr().logIndexPageInsertionClr(
 						this.txNum, indexName, isDirPage, keyType, blkNum,
 						slotId, this.lsn);
-				VanillaDb.logMgr().flush(lsn);
+				VanillaDb.nvmLogMgr().flush(lsn);
 			}
 		} else {
 			BlockId PageBlk = new BlockId(BTreeLeaf.getFileName(indexName),
@@ -113,7 +110,7 @@ public class IndexPageDeleteRecord implements LogRecord {
 				LogSeqNum lsn = tx.recoveryMgr().logIndexPageInsertionClr(
 						this.txNum, indexName, isDirPage, keyType, blkNum,
 						slotId, this.lsn);
-				VanillaDb.logMgr().flush(lsn);
+				VanillaDb.nvmLogMgr().flush(lsn);
 			}
 		}
 		tx.bufferMgr().unpin(BlockBuff);
@@ -165,8 +162,11 @@ public class IndexPageDeleteRecord implements LogRecord {
 
 	@Override
 	public LogSeqNum getLSN() {
-
 		return lsn;
 	}
-
+	
+	@Override
+	public void setLSN(LogSeqNum lsn) {
+		this.lsn = lsn;
+	}
 }

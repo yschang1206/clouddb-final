@@ -50,8 +50,8 @@ public class LogMgr implements Iterable<BasicLogRecord> {
 	private Page myPage = new Page();
 	private BlockId currentBlk;
 	private int currentPos;
-	private LogSeqNum lastLsn = LogSeqNum.DEFAULT_VALUE;
-	private LogSeqNum lastFlushedLsn = LogSeqNum.DEFAULT_VALUE;
+	private LogPosition lastLsn = LogPosition.DEFAULT_VALUE;
+	private LogPosition lastFlushedLsn = LogPosition.DEFAULT_VALUE;
 
 	private final Lock logMgrLock = new ReentrantLock();
 
@@ -94,7 +94,7 @@ public class LogMgr implements Iterable<BasicLogRecord> {
 	 * @param lsn
 	 *            the LSN of a log record
 	 */
-	public void flush(LogSeqNum lsn) {
+	public void flush(LogPosition lsn) {
 		logMgrLock.lock();
 		try {
 			if (lsn.compareTo(lastFlushedLsn) >= 0)
@@ -132,7 +132,7 @@ public class LogMgr implements Iterable<BasicLogRecord> {
 	 *            the list of values
 	 * @return the LSN of the log record
 	 */
-	public LogSeqNum append(Constant[] rec) {
+	public LogPosition append(Constant[] rec) {
 		logMgrLock.lock();
 		try {
 			// two integers that point to the previous and next log records
@@ -147,7 +147,7 @@ public class LogMgr implements Iterable<BasicLogRecord> {
 			}
 			
 			// Get the current LSN
-			LogSeqNum lsn = currentLSN();
+			LogPosition lsn = currentLSN();
 			
 			// Append a record
 			for (Constant c : rec)
@@ -194,8 +194,8 @@ public class LogMgr implements Iterable<BasicLogRecord> {
 	 * 
 	 * @return the LSN of the most recent log record
 	 */
-	private LogSeqNum currentLSN() {
-		return new LogSeqNum(currentBlk.number(), currentPos);
+	private LogPosition currentLSN() {
+		return new LogPosition(currentBlk.number(), currentPos);
 	}
 
 	/**

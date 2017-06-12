@@ -53,7 +53,6 @@ class RollbackRecord implements LogRecord {
 	 */
 	public RollbackRecord(BasicLogRecord rec) {
 		this.txNum = (Long) rec.nextVal(BIGINT).asJavaVal();
-		lsn = rec.getLSN();
 	}
 
 	/**
@@ -65,8 +64,7 @@ class RollbackRecord implements LogRecord {
 	 */
 	@Override
 	public LogSeqNum writeToLog() {
-		List<Constant> rec = buildRecord();
-		return logMgr.append(rec.toArray(new Constant[rec.size()]));
+		return nvmLogMgr.append(this);
 	}
 
 	@Override
@@ -110,7 +108,11 @@ class RollbackRecord implements LogRecord {
 
 	@Override
 	public LogSeqNum getLSN() {
-
 		return lsn;
+	}
+	
+	@Override
+	public void setLSN(LogSeqNum lsn) {
+		this.lsn = lsn;
 	}
 }

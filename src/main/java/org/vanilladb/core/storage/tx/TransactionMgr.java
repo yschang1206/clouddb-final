@@ -156,7 +156,7 @@ public class TransactionMgr implements TransactionLifecycleListener {
 			txNums = new LinkedList<Long>(activeTxs);
 			checkpointTx.bufferMgr().flushAll();
 			LogSeqNum lsn = checkpointTx.recoveryMgr().checkpoint(txNums);
-			VanillaDb.logMgr().flush(lsn);
+			VanillaDb.nvmLogMgr().flush(lsn);
 		}
 	}
 

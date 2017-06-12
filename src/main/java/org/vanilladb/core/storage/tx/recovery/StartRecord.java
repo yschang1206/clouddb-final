@@ -50,7 +50,6 @@ class StartRecord implements LogRecord {
 	 */
 	public StartRecord(BasicLogRecord rec) {
 		txNum = (Long) rec.nextVal(BIGINT).asJavaVal();
-		lsn = rec.getLSN();
 	}
 
 	/**
@@ -61,8 +60,7 @@ class StartRecord implements LogRecord {
 	 */
 	@Override
 	public LogSeqNum writeToLog() {
-		List<Constant> rec = buildRecord();
-		return logMgr.append(rec.toArray(new Constant[rec.size()]));
+		return nvmLogMgr.append(this);
 	}
 
 	@Override
@@ -107,5 +105,10 @@ class StartRecord implements LogRecord {
 	@Override
 	public LogSeqNum getLSN() {
 		return lsn;
+	}
+	
+	@Override
+	public void setLSN(LogSeqNum lsn) {
+		this.lsn = lsn;
 	}
 }

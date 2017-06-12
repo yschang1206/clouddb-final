@@ -79,7 +79,7 @@ public class LogReader {
 
 		// get record
 		// TODO : Need to check currentPos type
-		currentRec = readRecord(new BasicLogRecord(page, new LogSeqNum(currentBlk.number(), currentPos)));
+		//currentRec = readRecord(new BasicLogRecord(page, new LogSeqNum(currentBlk.number(), currentPos)));
 		// move to next record position
 		int nextPos = (Integer) page.getVal(currentPos - pointerSize, Type.INTEGER).asJavaVal();
 		currentPos = nextPos + pointerSize;
