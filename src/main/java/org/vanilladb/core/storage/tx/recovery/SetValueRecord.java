@@ -95,10 +95,8 @@ class SetValueRecord implements LogRecord {
 	 */
 	@Override
 	public LogSeqNum writeToLog() {
-
-		List<Constant> rec = buildRecord();
-		return nvmLogMgr.append(this);
-
+		this.lsn = nvmLogMgr.append(this);
+		return this.lsn;
 	}
 
 	@Override

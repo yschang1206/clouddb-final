@@ -60,7 +60,8 @@ public class RecordFileInsertEndRecord extends LogicalEndRecord implements LogRe
 
 	@Override
 	public LogSeqNum writeToLog() {
-		return nvmLogMgr.append(this);
+		this.lsn = nvmLogMgr.append(this);
+		return this.lsn;
 	}
 
 	@Override

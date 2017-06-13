@@ -39,6 +39,7 @@ import org.vanilladb.core.storage.metadata.statistics.StatMgr;
 import org.vanilladb.core.storage.tx.Transaction;
 import org.vanilladb.core.storage.tx.TransactionMgr;
 import org.vanilladb.core.storage.tx.recovery.CheckpointTask;
+import org.vanilladb.core.storage.tx.recovery.PersistTask;
 import org.vanilladb.core.storage.tx.recovery.RecoveryMgr;
 import org.vanilladb.core.util.CoreProperties;
 import org.vanilladb.core.util.Profiler;
@@ -146,7 +147,7 @@ public class VanillaDb {
 				logger.info("recovering existing database");
 			// add a checkpoint record to limit rollback
 			RecoveryMgr.recover(initTx);
-			logMgr.removeAndCreateNewLog();
+			//logMgr.removeAndCreateNewLog();
 		}
 
 		// initialize the statistics manager to build the histogram
@@ -160,7 +161,8 @@ public class VanillaDb {
 				VanillaDb.class.getName() + ".DO_CHECKPOINT", true);
 		if (doCheckpointing)
 			initCheckpointingTask();
-
+		initPersistingTask();
+		
 		// finish initialization
 		inited = true;
 	}
@@ -245,6 +247,10 @@ public class VanillaDb {
 	 */
 	public static void initCheckpointingTask() {
 		taskMgr.runTask(new CheckpointTask());
+	}
+	
+	public static void initPersistingTask() {
+		taskMgr.runTask(new PersistTask());
 	}
 
 	public static FileMgr fileMgr() {

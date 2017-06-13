@@ -16,7 +16,6 @@
 package org.vanilladb.core.storage.log;
 
 import org.vanilladb.core.sql.BigIntConstant;
-import org.vanilladb.core.sql.Constant;
 import org.vanilladb.core.sql.Type;
 import org.vanilladb.core.storage.file.Page;
 

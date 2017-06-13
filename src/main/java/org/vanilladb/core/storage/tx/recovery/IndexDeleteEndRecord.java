@@ -70,7 +70,8 @@ public class IndexDeleteEndRecord extends LogicalEndRecord implements LogRecord 
 
 	@Override
 	public LogSeqNum writeToLog() {
-		return nvmLogMgr.append(this);
+		this.lsn = nvmLogMgr.append(this);
+		return this.lsn;
 	}
 
 	@Override

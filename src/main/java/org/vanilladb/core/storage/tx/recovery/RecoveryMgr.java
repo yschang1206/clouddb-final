@@ -22,6 +22,7 @@ import static org.vanilladb.core.storage.tx.recovery.LogRecord.OP_START;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -286,7 +287,9 @@ public class RecoveryMgr implements TransactionLifecycleListener {
 	 * for the transaction, until it finds the transaction's START record.
 	 */
 	private void doRollback(Transaction tx) {
-		ReversibleIterator<LogRecord> iter = new LogRecordIterator();
+		//ReversibleIterator<LogRecord> iter = new LogRecordIterator();
+		Iterator<LogRecord> iter = VanillaDb.nvmLogMgr().
+				getTxLogRecordIterator(tx.getTransactionNumber());
 		LogSeqNum txUnDoNextLSN = null;
 		while (iter.hasNext()) {
 			LogRecord rec = iter.next();
@@ -363,7 +366,9 @@ public class RecoveryMgr implements TransactionLifecycleListener {
 		Set<Long> unCompletedTxs = new HashSet<Long>();
 
 		List<Long> txsOnCheckpointing = null;
-		ReversibleIterator<LogRecord> iter = new LogRecordIterator();
+		//ReversibleIterator<LogRecord> iter = new LogRecordIterator();
+		ReversibleIterator<LogRecord> iter = VanillaDb.nvmLogMgr().
+				getLogRecordIterator();
 		/*
 		 * analyze phase: Find the earliest unfinished txNum
 		 */

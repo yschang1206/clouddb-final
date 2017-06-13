@@ -42,7 +42,7 @@ import org.vanilladb.core.storage.log.BasicLogRecord;
  * {@link org.vanilladb.core.storage.log.LogIterator LogIterator}, this class
  * understands the meaning of the log records.
  */
-class LogRecordIterator implements ReversibleIterator<LogRecord> {
+public class LogRecordIterator implements ReversibleIterator<LogRecord> {
 	private ReversibleIterator<BasicLogRecord> iter = VanillaDb.logMgr().iterator();
 
 	@Override

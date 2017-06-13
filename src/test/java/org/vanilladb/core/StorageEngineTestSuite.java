@@ -27,7 +27,6 @@ import org.vanilladb.core.storage.buffer.BufferConcurrencyTest;
 import org.vanilladb.core.storage.buffer.BufferMgrConcurrencyTest;
 import org.vanilladb.core.storage.buffer.BufferPoolConcurrencyTest;
 import org.vanilladb.core.storage.buffer.BufferTest;
-import org.vanilladb.core.storage.buffer.LastLSNTest;
 import org.vanilladb.core.storage.file.FileMgr;
 import org.vanilladb.core.storage.file.FileTest;
 import org.vanilladb.core.storage.file.PageConcurrencyTest;
@@ -51,7 +50,6 @@ import org.vanilladb.core.storage.tx.recovery.RecoveryBasicTest;
 	// storage.buffer
 	BufferTest.class, BufferConcurrencyTest.class,
 	BufferMgrConcurrencyTest.class, BufferPoolConcurrencyTest.class,
-	LastLSNTest.class,
 	
 	// storage.record
 	RecordTest.class,
