@@ -91,7 +91,7 @@ public class IndexPageInsertRecord implements LogRecord {
 		// repeat history
 		Buffer BlockBuff;
 		if (isDirPage) {
-			BlockId PageBlk = new BlockId(BTreeDir.getFileName(indexName),
+			BlockId PageBlk = new BlockId(indexName,
 					blkNum);
 			BlockBuff = tx.bufferMgr().pin(PageBlk);
 			if (this.lsn.compareTo(BlockBuff.lastLsn()) == 1) {
@@ -103,7 +103,7 @@ public class IndexPageInsertRecord implements LogRecord {
 			}
 
 		} else {
-			BlockId PageBlk = new BlockId(BTreeLeaf.getFileName(indexName),
+			BlockId PageBlk = new BlockId(indexName,
 					blkNum);
 			BlockBuff = tx.bufferMgr().pin(PageBlk);
 			if (this.lsn.compareTo(BlockBuff.lastLsn()) == 1) {
@@ -122,7 +122,7 @@ public class IndexPageInsertRecord implements LogRecord {
 	public void redo(Transaction tx) {
 		Buffer BlockBuff;
 		if (isDirPage) {
-			BlockId PageBlk = new BlockId(BTreeDir.getFileName(indexName),
+			BlockId PageBlk = new BlockId(indexName,
 					blkNum);
 			BlockBuff = tx.bufferMgr().pin(PageBlk);
 
@@ -130,7 +130,7 @@ public class IndexPageInsertRecord implements LogRecord {
 				BTreeDir.insertASlot(tx, indexName, keyType, blkNum, slotId);
 			}
 		} else {
-			BlockId PageBlk = new BlockId(BTreeLeaf.getFileName(indexName),
+			BlockId PageBlk = new BlockId(indexName,
 					blkNum);
 			BlockBuff = tx.bufferMgr().pin(PageBlk);
 			if (this.lsn.compareTo(BlockBuff.lastLsn()) == 1) {

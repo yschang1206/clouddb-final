@@ -53,9 +53,9 @@ public class NVMLogMgr {
 				e.printStackTrace();
 			}
 		} else {
-			// XXX: initial head should be (-1, -1)
 			this.globalLsn = 0;
-			ringBuffer = new NVMLogRingBuffer(100000000, 0, 0, 0, 0);
+			//ringBuffer = new NVMLogRingBuffer(4000000, 0, 0, 0, 0);
+			ringBuffer = new NVMLogRingBuffer(15000000, 0, 0, 0, 0);
 		}
 	}
 	
@@ -94,6 +94,10 @@ public class NVMLogMgr {
 	
 	public ReversibleIterator<LogRecord> getLogRecordIterator() {
 		return new NVMLogIterator(ringBuffer);
+	}
+	
+	public void checkpoint(List<Long> txNums) {
+		ringBuffer.moveHeadForward(txNums);
 	}
  	
 	public void persist() {

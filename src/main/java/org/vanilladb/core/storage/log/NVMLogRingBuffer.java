@@ -1,6 +1,7 @@
 package org.vanilladb.core.storage.log;
 
-import java.util.LinkedList;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -39,6 +40,9 @@ public class NVMLogRingBuffer {
 	/* Volatile data structure */
 	private ReadWriteLock logHeadLock = new ReentrantReadWriteLock();
 	
+	/* Debug */
+	private PrintWriter debug;
+	
 	public NVMLogRingBuffer(int size, int tailIdx, long tailLsn, 
 			int headIdx, long headLsn) {
 		this.size = size;
@@ -47,6 +51,13 @@ public class NVMLogRingBuffer {
 			ring[i] = new LogEntry();
 		this.logTail = new LogPointer(tailIdx, tailLsn);
 		this.logHead = new LogPointer(headIdx, headLsn);
+		
+		/* Debug */
+		try {
+			debug = new PrintWriter(new FileOutputStream("/home/yschang/debug.txt"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -62,6 +73,8 @@ public class NVMLogRingBuffer {
 			insert(rec, lsn);
 			lsn--;
 		}
+		debug.println("lsn = " + lsn + " logHead.lsn = " + logHead.lsn);
+		debug.flush();
 	}
 	
 	public LogRecord get(int idx) {
@@ -69,9 +82,12 @@ public class NVMLogRingBuffer {
 	}
 	
 	public void insert(LogRecord rec, long lsn) {
+		logHeadLock.readLock().lock();
 		int idx = logHead.idx + (int)(lsn - logHead.lsn);
+		idx = idx % size;
 		ring[idx].rec = rec;
 		ring[idx].isPersist = true;
+		logHeadLock.readLock().unlock();
 	}
 	
 	public void checkPersistence(long lsn) {
@@ -80,7 +96,7 @@ public class NVMLogRingBuffer {
 		}
 	}
 		
-	public void moveHeadForward(LinkedList<Long> txNums) {
+	public void moveHeadForward(List<Long> txNums) {
 		logHeadLock.writeLock().lock();
 		int idx = logHead.idx;
 		long lsn = logHead.lsn;
@@ -97,7 +113,11 @@ public class NVMLogRingBuffer {
 		}
 		logHead.idx = idx;
 		logHead.lsn = lsn;
-		logHeadLock.writeLock().lock();
+		logHeadLock.writeLock().unlock();
+		debug.write("Move logHead forward.\n");
+		debug.write("logHead: idx = " + logHead.idx + " lsn = " + logHead.lsn + "\n");
+		debug.write("logTail: idx = " + logTail.idx + " lsn = " + logTail.lsn + "\n");
+		debug.flush();
 	}
 	
 	public void moveTailForward() {

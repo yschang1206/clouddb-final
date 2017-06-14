@@ -123,6 +123,7 @@ public class RecoveryMgr implements TransactionLifecycleListener {
 	 * @return the LSN of the log record.
 	 */
 	public LogSeqNum checkpoint(List<Long> txNums) {
+		VanillaDb.nvmLogMgr().checkpoint(txNums);
 		return new CheckpointRecord(txNums).writeToLog();
 	}
 
