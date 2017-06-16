@@ -14,8 +14,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.vanilladb.core.server.VanillaDb;
+import org.vanilladb.core.storage.file.FileMgr;
 import org.vanilladb.core.storage.tx.recovery.LogRecord;
 import org.vanilladb.core.storage.tx.recovery.ReversibleIterator;
+import org.vanilladb.core.util.CoreProperties;
 
 public class NVMLogMgr {
 	private LogMgr logMgr = VanillaDb.logMgr();
@@ -27,10 +29,17 @@ public class NVMLogMgr {
 	private NVMLogRingBuffer ringBuffer;
 	private long globalLsn;
 	
-	final static String NV_DATA_STRUCTURE = "/home/yschang/buffer.bin";
+	private static final String NVM_DATA_STRUCTURE_FILE;
+	private static final int NVM_RING_BUFFER_SIZE;
+	static {
+		NVM_DATA_STRUCTURE_FILE = CoreProperties.getLoader().getPropertyAsString(NVMLogMgr.class.getName() + ".NVM_DATA_STRUCTURE_FILE",
+				"nvm.bin");
+		NVM_RING_BUFFER_SIZE = CoreProperties.getLoader().getPropertyAsInteger(NVMLogMgr.class.getName() + ".NVM_RING_BUFFER_SIZE",
+				10000000);
+	}
 	
 	public NVMLogMgr() {
-		File f = new File(NV_DATA_STRUCTURE);
+		File f = new File(FileMgr.getLogDirectoryPath(), NVM_DATA_STRUCTURE_FILE);
 		if (f.exists()) {
 			try {
 				DataInputStream dis = new DataInputStream(
@@ -55,7 +64,7 @@ public class NVMLogMgr {
 		} else {
 			this.globalLsn = 0;
 			//ringBuffer = new NVMLogRingBuffer(4000000, 0, 0, 0, 0);
-			ringBuffer = new NVMLogRingBuffer(15000000, 0, 0, 0, 0);
+			ringBuffer = new NVMLogRingBuffer(NVM_RING_BUFFER_SIZE, 0, 0, 0, 0);
 		}
 	}
 	
@@ -96,14 +105,22 @@ public class NVMLogMgr {
 		return new NVMLogIterator(ringBuffer);
 	}
 	
+	public double utilization() {
+		long headLsn = ringBuffer.headLsn();
+		long tailLsn = ringBuffer.tailLsn();
+		int size = ringBuffer.size();
+		return (double)(tailLsn - headLsn) / (double)size;
+	}
+
 	public void checkpoint(List<Long> txNums) {
 		ringBuffer.moveHeadForward(txNums);
 	}
- 	
+	
 	public void persist() {
-		DataOutputStream dos;
 		try {
-			dos = new DataOutputStream(new FileOutputStream(NV_DATA_STRUCTURE));
+			DataOutputStream dos;
+			File f = new File(FileMgr.getLogDirectoryPath(), NVM_DATA_STRUCTURE_FILE);
+			dos = new DataOutputStream(new FileOutputStream(f));
 			dos.writeLong(globalLsn);
 			dos.writeInt(ringBuffer.size());
 			dos.writeInt(ringBuffer.tailIdx());

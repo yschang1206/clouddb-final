@@ -54,6 +54,7 @@ public class FileMgr {
 	private File dbDirectory, logDirectory;
 	private boolean isNew;
 	private Map<String, IoChannel> openFiles = new ConcurrentHashMap<String, IoChannel>();
+	private static String logDirectoryPath;
 
 	static {
 		String dbDir = CoreProperties.getLoader().getPropertyAsString(FileMgr.class.getName() + ".DB_FILES_DIR",
@@ -133,6 +134,8 @@ public class FileMgr {
 
 		for (int i = 0; i < anchors.length; ++i)
 			anchors[i] = new Object();
+		
+		logDirectoryPath = logDirectory.getAbsolutePath();
 	}
 
 	/**
@@ -257,6 +260,10 @@ public class FileMgr {
 		} catch (IOException e) {
 			throw new RuntimeException("rebuild log file fail");
 		}
+	}
+	
+	public static String getLogDirectoryPath() {
+		return logDirectoryPath;
 	}
 
 	/**

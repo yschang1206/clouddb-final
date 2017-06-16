@@ -10,6 +10,7 @@ import org.vanilladb.core.sql.Constant;
 import org.vanilladb.core.storage.tx.recovery.LogRecord;
 import org.vanilladb.core.storage.tx.recovery.LogRecordIterator;
 import org.vanilladb.core.storage.tx.recovery.ReversibleIterator;
+import org.vanilladb.core.util.CoreProperties;
 
 public class NVMLogRingBuffer {
 	class LogEntry {
@@ -42,6 +43,12 @@ public class NVMLogRingBuffer {
 	
 	/* Debug */
 	private PrintWriter debug;
+	
+	private static final long NVM_DELAY;
+	static {
+		NVM_DELAY = CoreProperties.getLoader().getPropertyAsInteger(NVMLogRingBuffer.class.getName() + ".NVM_DELAY",
+				400);
+	}
 	
 	public NVMLogRingBuffer(int size, int tailIdx, long tailLsn, 
 			int headIdx, long headLsn) {
@@ -86,7 +93,9 @@ public class NVMLogRingBuffer {
 		int idx = logHead.idx + (int)(lsn - logHead.lsn);
 		idx = idx % size;
 		ring[idx].rec = rec;
+		delay();
 		ring[idx].isPersist = true;
+		delay();
 		logHeadLock.readLock().unlock();
 	}
 	
@@ -111,7 +120,9 @@ public class NVMLogRingBuffer {
 			idx = (idx + 1) % size;
 			lsn++;
 		}
+		delay();
 		logHead.idx = idx;
+		delay();
 		logHead.lsn = lsn;
 		logHeadLock.writeLock().unlock();
 		debug.write("Move logHead forward.\n");
@@ -129,7 +140,9 @@ public class NVMLogRingBuffer {
 				idx = (idx + 1) % size;
 				lsn++;
 			}
+			delay();
 			logTail.idx = idx;
+			delay();
 			logTail.lsn = lsn;
 		}
 	}
@@ -161,5 +174,13 @@ public class NVMLogRingBuffer {
 			p = logMgr.append(l.toArray(new Constant[l.size()]));
 		}
 		logMgr.flush(p);
+	}
+	
+	private void delay() {
+		long start = System.nanoTime();
+	    long end = 0;
+	    do{
+	        end = System.nanoTime();
+	    } while (start + NVM_DELAY >= end);
 	}
 }

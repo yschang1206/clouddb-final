@@ -19,6 +19,8 @@ import java.util.logging.Logger;
 
 import org.vanilladb.core.server.VanillaDb;
 import org.vanilladb.core.server.task.Task;
+import org.vanilladb.core.storage.log.NVMLogMgr;
+import org.vanilladb.core.util.CoreProperties;
 
 /**
  * The task performs non-quiescent checkpointing.
@@ -26,6 +28,11 @@ import org.vanilladb.core.server.task.Task;
 public class PersistTask extends Task {
 	private static Logger logger = Logger.getLogger(PersistTask.class
 			.getName());
+	private static final int NVM_PERSIST_PERIOD;
+	static {
+		NVM_PERSIST_PERIOD = CoreProperties.getLoader().getPropertyAsInteger(PersistTask.class.getName() + ".NVM_PERSIST_PERIOD",
+				70000);
+	}
 
 	public PersistTask() {
 
@@ -34,11 +41,12 @@ public class PersistTask extends Task {
 	@Override
 	public void run() {
 		try {
-			Thread.sleep(240000);
+			Thread.sleep(NVM_PERSIST_PERIOD);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		logger.info("Start persisting log buffer");
+		logger.info("Start persisting data structure in NVM");
 		VanillaDb.nvmLogMgr().persist();
+		logger.info("Data structure in NVM has been persisted");
 	}
 }
