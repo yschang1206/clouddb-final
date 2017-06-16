@@ -5,10 +5,12 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Logger;
 
 import org.vanilladb.core.sql.Constant;
 import org.vanilladb.core.storage.tx.recovery.LogRecord;
 import org.vanilladb.core.storage.tx.recovery.LogRecordIterator;
+import org.vanilladb.core.storage.tx.recovery.PersistTask;
 import org.vanilladb.core.storage.tx.recovery.ReversibleIterator;
 import org.vanilladb.core.util.CoreProperties;
 
@@ -33,6 +35,9 @@ public class NVMLogRingBuffer {
 		}
 	};
 	
+	private static Logger logger = Logger.getLogger(NVMLogRingBuffer.class
+			.getName());
+	
 	/* Non-volatile data structures */
 	private int size;
 	private LogEntry[] ring;
@@ -40,9 +45,6 @@ public class NVMLogRingBuffer {
 	
 	/* Volatile data structure */
 	private ReadWriteLock logHeadLock = new ReentrantReadWriteLock();
-	
-	/* Debug */
-	private PrintWriter debug;
 	
 	private static final long NVM_DELAY;
 	static {
@@ -58,13 +60,6 @@ public class NVMLogRingBuffer {
 			ring[i] = new LogEntry();
 		this.logTail = new LogPointer(tailIdx, tailLsn);
 		this.logHead = new LogPointer(headIdx, headLsn);
-		
-		/* Debug */
-		try {
-			debug = new PrintWriter(new FileOutputStream("/home/yschang/debug.txt"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 	
 	/**
@@ -80,8 +75,10 @@ public class NVMLogRingBuffer {
 			insert(rec, lsn);
 			lsn--;
 		}
-		debug.println("lsn = " + lsn + " logHead.lsn = " + logHead.lsn);
-		debug.flush();
+		logger.info("(tailLsn, headLsn) = (" + logTail.lsn + ", " + logHead.lsn + ")");
+		logger.info("If lsn is not equal to (headLsn - 1)," + 
+				" the log record objects may have not been successfully rebuilt." + 
+				" (lsn, headLsn) = (" + lsn + ", " + logHead.lsn + ")");
 	}
 	
 	public LogRecord get(int idx) {
@@ -125,10 +122,6 @@ public class NVMLogRingBuffer {
 		delay();
 		logHead.lsn = lsn;
 		logHeadLock.writeLock().unlock();
-		debug.write("Move logHead forward.\n");
-		debug.write("logHead: idx = " + logHead.idx + " lsn = " + logHead.lsn + "\n");
-		debug.write("logTail: idx = " + logTail.idx + " lsn = " + logTail.lsn + "\n");
-		debug.flush();
 	}
 	
 	public void moveTailForward() {

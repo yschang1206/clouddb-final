@@ -54,16 +54,11 @@ public class NVMLogMgr {
 				ringBuffer = new NVMLogRingBuffer(size, tailIdx, tailLsn, 
 						headIdx, headLsn);
 				ringBuffer.rebuild();
-				System.out.println("Rebuild non-volatile data structure " +
-				" globalLsn = " + globalLsn + " size = " + size + 
-				" tailIdx = " + tailIdx + " tailLsn = " + tailLsn +
-				" headIdx = " + headIdx + " headLsn = " + headLsn);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		} else {
 			this.globalLsn = 0;
-			//ringBuffer = new NVMLogRingBuffer(4000000, 0, 0, 0, 0);
 			ringBuffer = new NVMLogRingBuffer(NVM_RING_BUFFER_SIZE, 0, 0, 0, 0);
 		}
 	}

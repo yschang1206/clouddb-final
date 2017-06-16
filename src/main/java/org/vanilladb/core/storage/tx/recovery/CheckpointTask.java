@@ -81,14 +81,9 @@ public class CheckpointTask extends Task {
 				VanillaDb.txMgr().createCheckpoint(tx);
 				tx.commit();
 			}
-			try {
-				PrintWriter debug = new PrintWriter(new FileOutputStream("/home/yschang/debug.txt"), true);
-				debug.println(VanillaDb.nvmLogMgr().utilization());
-				debug.flush();
-				debug.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			if (logger.isLoggable(Level.INFO))
+				logger.info("Buffer utilization: " + 
+						VanillaDb.nvmLogMgr().utilization());
 		}
 		else if (MY_METHOD == METHOD_PERIODIC) {
 			if (logger.isLoggable(Level.INFO))

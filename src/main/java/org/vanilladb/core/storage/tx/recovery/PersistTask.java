@@ -19,11 +19,12 @@ import java.util.logging.Logger;
 
 import org.vanilladb.core.server.VanillaDb;
 import org.vanilladb.core.server.task.Task;
-import org.vanilladb.core.storage.log.NVMLogMgr;
 import org.vanilladb.core.util.CoreProperties;
 
 /**
- * The task performs non-quiescent checkpointing.
+ * At first, we used this class to persist data structure in NVM periodically.
+ * But since we've made this task a stored procedure, this class is now 
+ * deprecated.
  */
 public class PersistTask extends Task {
 	private static Logger logger = Logger.getLogger(PersistTask.class
