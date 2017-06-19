@@ -11,8 +11,8 @@ public class NVMLogIterator  implements ReversibleIterator<LogRecord> {
 	public NVMLogIterator(NVMLogRingBuffer ringBuffer) {
 		this.ringBuffer = ringBuffer;
 		this.lower = ringBuffer.headIdx();
-		this.upper = ringBuffer.tailIdx();
-		this.currentIdx = upper - 1;
+		this.upper = ringBuffer.tailIdx() - 1;
+		this.currentIdx = upper;
 	}
 	
 	@Override

@@ -39,6 +39,7 @@ public class CheckpointTask extends Task {
 	private static final long PERIOD;
 	private long lastTxNum;
 	private boolean first = true;
+	//private int checkpointCount = 0;
 
 	static {
 		TX_COUNT_TO_CHECKPOINT = CoreProperties.getLoader()
@@ -76,6 +77,7 @@ public class CheckpointTask extends Task {
 					logger.info("Start creating checkpoint");
 				flag = true;
 				first = false;
+				//checkpointCount++;
 				Transaction tx = VanillaDb.txMgr().newTransaction(
 						Connection.TRANSACTION_SERIALIZABLE, false);
 				VanillaDb.txMgr().createCheckpoint(tx);
@@ -84,6 +86,7 @@ public class CheckpointTask extends Task {
 			if (logger.isLoggable(Level.INFO))
 				logger.info("Buffer utilization: " + 
 						VanillaDb.nvmLogMgr().utilization());
+			//System.out.println("checkpoint count : " + checkpointCount);
 		}
 		else if (MY_METHOD == METHOD_PERIODIC) {
 			if (logger.isLoggable(Level.INFO))

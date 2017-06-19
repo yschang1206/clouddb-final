@@ -294,7 +294,7 @@ public class RecoveryMgr implements TransactionLifecycleListener {
 		LogSeqNum txUnDoNextLSN = null;
 		while (iter.hasNext()) {
 			LogRecord rec = iter.next();
-			if (rec.txNumber() == txNum) {
+			if (true) {
 				if (txUnDoNextLSN != null) {
 					if (txUnDoNextLSN.compareTo(rec.getLSN()) != 1)
 						continue;
